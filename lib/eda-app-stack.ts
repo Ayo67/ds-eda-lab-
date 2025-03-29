@@ -58,18 +58,6 @@ export class EDAAppStack extends cdk.Stack {
     entry: `${__dirname}/../lambdas/mailer.ts`,
   });
 
-  mailerFn.addToRolePolicy(
-    new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW,
-      actions: [
-        "ses:SendEmail",
-        "ses:SendRawEmail",
-        "ses:SendTemplatedEmail",
-      ],
-      resources: ["*"],
-    })
-  );
-
 
 
   // S3 --> SQS
@@ -99,12 +87,26 @@ newImageTopic.addSubscription(new subs.SqsSubscription(mailerQ));
 
 
   processImageFn.addEventSource(newImageEventSource);
+
+  mailerFn.addToRolePolicy(
+    new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        "ses:SendEmail",
+        "ses:SendRawEmail",
+        "ses:SendTemplatedEmail",
+      ],
+      resources: ["*"],
+    })
+  );
+  
   mailerFn.addEventSource(newImageMailEventSource);
 
 
   // Permissions
 
   imagesBucket.grantRead(processImageFn);
+
 
   // Output
   
